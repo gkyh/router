@@ -66,12 +66,6 @@ func (p *Router) Cookie(cookieName string, maxLifeTime, cookieTime int64) {
 	p.session = session
 
 }
-func (p *Router) Redis(cookieName string, maxLifeTime, cookieTime int64, RedisHost, RedisPwd string, database ...int) {
-
-	session = NewRedisSession(cookieName, maxLifeTime, cookieTime, RedisHost, RedisPwd, database...)
-	p.session = session
-
-}
 */
 
 func (p *Router) Logger(log RouteLogger) {
@@ -340,7 +334,7 @@ func ErrRespone(next HandlerFunc) HandlerFunc {
 		defer func() {
 			if err := recover(); err != nil {
 
-				logger.Error("error:", err)
+				print(err)
 				ctx.WriteString(err.(string))
 				return
 			}
