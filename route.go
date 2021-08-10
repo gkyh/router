@@ -334,3 +334,21 @@ func (p *Router) Route(url string, i IRouter, params ...HandlerFun) {
 	p.base = ""
 
 }
+func ErrRespone(next HandlerFunc) HandlerFunc {
+	return func(r *http.Request, ctx *Context) {
+
+		defer func() {
+			if err := recover(); err != nil {
+
+				logger.Error("error:", err)
+				ctx.WriteString(err.(string))
+				return
+			}
+		}()
+		next(r, ctx)
+	}
+}
+func (p *Router) UseErrResp() {
+
+	p.mws = append(p.mws, ErrRespone)
+}
