@@ -1,4 +1,4 @@
-package gwr
+package gts
 
 import (
 	"net/http"
@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"runtime"
 	"strings"
+	"time"
 )
 
 type IRouter interface {
@@ -33,7 +34,8 @@ var (
 		"PUT":    4,
 	}
 )
-
+var srvReadTimeout int = 30
+var srvWriteTimeout int = 60
 var logger RouteLogger
 
 type RouteLogger interface {
@@ -52,6 +54,27 @@ func New() *Router {
 		session: nil,
 		base:    "",
 	}
+}
+func (p *Router) ServerTimeout(readTimeout, writeTimeout int) {
+
+	srvReadTimeout = readTimeout
+	srvWriteTimeout = writeTimeout
+}
+func (p *Router) Run(addr string) {
+
+	srv := &http.Server{
+		Addr:           addr,
+		Handler:        p,
+		ReadTimeout:    time.Duration(srvReadTimeout) * time.Second,
+		WriteTimeout:   time.Duration(srvWriteTimeout) * time.Second,
+		MaxHeaderBytes: 1 << 20, // 1 MB
+	}
+
+	if err := srv.ListenAndServe(); err != nil {
+		print(err)
+		panic(err)
+	}
+
 }
 
 func (p *Router) InitSession(ss Session) {

@@ -4,13 +4,13 @@ golang搭建极简的原生WEB后台项目
 ```go
 
   import (  
-    "github.com/gkyh/gwf"  
+    "github.com/gkyh/router"  
     "net/http"  
    )  
  
    func main() {  
      
-     route := gwf.New()  
+     route := gts.New()  
      
      //实现RouteLogger接口的均可
      //type RouteLogger interface {
@@ -18,14 +18,7 @@ golang搭建极简的原生WEB后台项目
      // }
      var logger *log.Logger
      route.Logger(logger)
-     
-    srv := &http.Server{   
-      Addr:           ":8080",   
-      Handler:        route,   
-      ReadTimeout:    5 * time.Second,   
-      WriteTimeout:   10 * time.Second,   
-      MaxHeaderBytes: 1 << 20,   
-    }   
+      
 
     //静态文件，参数1 请求url路径，参数2 请求文件路径
     r.Static("/public", "./public/") 
@@ -39,15 +32,15 @@ golang搭建极简的原生WEB后台项目
     r.Route("/test", testHandler, HandleIterceptor)  
     r.Group("/group", groupHandler)  
       
-    r.Get("/login", func(req *http.Request,ctx *gwf.Context) {  
+    r.Get("/login", func(req *http.Request,ctx *gts.Context) {  
 
       session:= ctx.Session()
       session.Set("username", "root")
       ctx.WriteString(200, "login")   
     })  
 
-    //注册路由必须现实 func(req *http.Request, c *gwf.Context) 格式的函数
-    r.Get("/user", func(req *http.Request, c *gwf.Context) {  
+    //注册路由必须现实 func(req *http.Request, c *gts.Context) 格式的函数
+    r.Get("/user", func(req *http.Request, c *gts.Context) {  
 
       session:= c.Session()  
       user := c.Get("username")  
@@ -64,10 +57,7 @@ golang搭建极简的原生WEB后台项目
     //r.Delete("/delete", func)  
    
 
-    if err := srv.ListenAndServe(); err != nil {
-
-      panic(err)
-    }
+    r.Run(":8080")
 
   }
   func groupHandler(route *gts.Router){  
@@ -77,8 +67,8 @@ golang搭建极简的原生WEB后台项目
 	  route.Post("/test",testFunc)
   }
   //中间件定义
-  func ws(next gwf.HandlerFunc) gwf.HandlerFunc {  
-     return func(ctx *gwf.Context) {  
+  func ws(next gts.HandlerFunc) gts.HandlerFunc {  
+     return func(ctx *gts.Context) {  
 
      ip := getRemoteIp(ctx.Request)
       fmt.Println("request ip:" + ip)
@@ -93,8 +83,8 @@ golang搭建极简的原生WEB后台项目
   }  
   
   //拦截器，（也是中间件的一种)
-  func HandleIterceptor(next gwf.HandlerFunc) gwf.HandlerFunc {. 
-    return func(c *gwf.Context) {   
+  func HandleIterceptor(next gts.HandlerFunc) gts.HandlerFunc {. 
+    return func(c *gts.Context) {   
   
     ip := r.RemoteAddr   
     fmt.Println("handleIterceptor,ip:" + ip)   
@@ -130,20 +120,20 @@ golang搭建极简的原生WEB后台项目
   type TestConterller struct {    
   }   
   //必须在Router方法中添加路由
-  func (p *TestConterller) Router(router *gwf.Router) {
+  func (p *TestConterller) Router(router *gts.Router) {
 
 	  router.Any("/list", p.mlogHandler)  
   
   }  
 
- func (p *TestConterller) ListHanlder(req *http.Request,c *gwf.Context) {  
+ func (p *TestConterller) ListHanlder(req *http.Request,c *gts.Context) {  
  
       req.ParseForm()
       data := req.FormValue("data")
       
       // 接收数据解析到struct
       form := &ReqForm{}
-      err := gwf.Bind(req, form)
+      err := gts.Bind(req, form)
  
  }  
  ```
@@ -158,11 +148,11 @@ golang搭建极简的原生WEB后台项目
 
   HTML(status int, html string)  
   
-  JSON(status int, m map[string]interface{})  
-  
-  Result(s string)   
+  JSON(v interface{})  
   
   Map(m map[string]interface{})
+
+  Err(code int, msg string)  //=〉{"code": 500, "msg": "处理失败"}
   
   OK()  //=〉{"code": 200, "msg": "处理成功"}
   

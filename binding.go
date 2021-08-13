@@ -1,4 +1,4 @@
-package gwr
+package gts
 
 import (
 	"errors"

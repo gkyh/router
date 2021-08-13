@@ -1,4 +1,4 @@
-package gwr
+package gts
 
 import (
 	"context"
@@ -74,14 +74,11 @@ func (c *Context) HTML(status int, s string) {
 	w.Write([]byte(s))
 }
 
-func (c *Context) JSON(status int, m map[string]interface{}) {
+func (c *Context) JSON(v interface{}) {
 
 	w := c.Writer
 	w.Header().Set("Content-Type", "application/Json; charset=utf-8")
-	w.WriteHeader(status)
-	jsonBytes, _ := json.Marshal(m)
-	print(string(jsonBytes))
-	w.Write(jsonBytes)
+	json.NewEncoder(w).Encode(v)
 }
 func (c *Context) Map(m map[string]interface{}) {
 
@@ -91,13 +88,6 @@ func (c *Context) Map(m map[string]interface{}) {
 	json.NewEncoder(w).Encode(m)
 }
 
-func (c *Context) Result(s string) {
-
-	w := c.Writer
-	w.Header().Set("Content-Type", "application/Json; charset=utf-8")
-	print(s)
-	io.WriteString(w, s)
-}
 func (c *Context) Err(code int32, s string) {
 
 	w := c.Writer
