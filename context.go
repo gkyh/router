@@ -96,7 +96,14 @@ func (c *Context) Err(code int32, s string) {
 	print(str)
 	io.WriteString(w, str)
 }
+func (c *Context) Msg(code int32, s string) {
 
+	w := c.Writer
+	w.Header().Set("Content-Type", "application/Json; charset=utf-8")
+	str := fmt.Sprintf(`{"code": %d, "msg": "%s"}`, code, s)
+	print(str)
+	io.WriteString(w, str)
+}
 func (c *Context) OK() {
 
 	w := c.Writer
@@ -105,6 +112,15 @@ func (c *Context) OK() {
 	str := `{"code": 200, "msg": "处理成功"}`
 	print(str)
 	io.WriteString(w, str)
+}
+
+func (c *Context) Resp() ResultBuilder {
+
+	return NewResp(c.Writer)
+}
+func (c *Context) RespData() ResourceBuilder {
+
+	return NewResData(c.Writer)
 }
 
 func (c *Context) Redirect(url string) {
